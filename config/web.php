@@ -42,14 +42,22 @@ $config = [
                 ],
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'db' => $db,
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                ''=>'site/index',
+                'post'=>'post/index',
+                'user'=>'user/index',
+                '<action>'=>'site/<action>',
             ],
         ],
     ],
+    'language' => 'ru-RU',
     'params' => $params,
 ];
 
@@ -66,7 +74,7 @@ if (YII_ENV_DEV) {
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*'],
     ];
 }
 

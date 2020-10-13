@@ -1,53 +1,77 @@
 <?php
 
+use app\models\Post;
+use app\models\User;
+use yii\helpers\Html;
+use yii\widgets\ActiveForm;
+
 /* @var $this yii\web\View */
+/* @var $model app\models\PostForm */
+/* @var $form ActiveForm */
 
-$this->title = 'My Yii Application';
+$this->title = 'My Yii Chat';
+$this->registerJsFile(
+    '@web/js/main.js',
+    ['depends' => [\yii\web\JqueryAsset::className()]]
+);
+
 ?>
-<div class="site-index">
 
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
-
+<div class="container">
     <div class="body-content">
+        <div class="panel panel-default">
+            <div class="panel-heading">Чат</div>
+            <div style="padding: 5px;">
+                <?php if (Yii::$app->user->can('readPosts')): ?>
+                    <?php foreach ($posts as $post): ?>
+                        <div class="panel panel-default" style="padding: 5px;
+                        <?= ($post->incorrect === Post::INCORRECT && !Yii::$app->user->can('readIncorrectMessage')) ?
+                            'display:none' : '' ?>
+                                " id="post-<?= $post->id ?>">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <?= $post->created_at ?>
+                                    <br>
+                                    <span style=" <?= (User::getUserRoleById($post->user_id) === 'admin') ? 'color: red' : '' ?>">
+                                        <?= $post->user->username ?>
+                                    </span>
+                                    <br>
 
-        <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+                                    <span id="message-<?= $post->id ?>" style="display: <?= ($post->incorrect === Post::INCORRECT) ? 'block' : 'none'?>">
+                                        СООБЩЕНИЕ НЕКОРРЕКТНО</span>
+                                    <?php if (Yii::$app->user->can('flagMessage') && $post->incorrect !== Post::INCORRECT): ?>
+                                    <br>
+                                    <button id="button-<?= $post->id ?>" class="btn btn-primary incorrect" value="<?= $post->id ?>">
+                                        Пометить сообщение некорректным
+                                    </button>
+                                    <?php endif ?>
+                                </div>
+                                <div class="col-md-8">
+                                    <?= Html::encode($post->text) ?>
+                                </div>
+                            </div>
+                        </div>
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+                    <?php endforeach ?>
+                <?php endif ?>
+                <?php if (Yii::$app->user->can('createPosts')): ?>
+                    <hr>
+                    <?php $form = ActiveForm::begin([
+                        'id' => 'form',
+                        'action' => 'save-form',
+                        'method' => 'post',
+                    ]); ?>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <?= $form->field($model, 'text')->label(false) ?>
+                        </div>
+                        <div class="col-md-3">
+                            <?= Html::submitButton('Отправить', ['class' => 'btn btn-primary']) ?>
+                        </div>
+                    </div>
+                    <?php ActiveForm::end(); ?>
+                <?php endif ?>
             </div>
         </div>
-
     </div>
 </div>
